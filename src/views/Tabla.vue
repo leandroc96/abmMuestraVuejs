@@ -1,171 +1,87 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="usuarios"
+  <v-card>
+    <v-data-table
+      :headers="headers"
+      :items="usuarios"
+    >
+      <template v-slot:[`usuario.accion`]='{usuario }'>
+        <div class="text-truncate">
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="showEditDialog(usuario)"
+                            color="primary" 
+                          >
+                            mdi-pencil
+                          </v-icon>
+                          <v-icon
+                            small
+                            @click="de(usuario)"
+                            color="pink" 
+                          >
+                            mdi-delete
+                          </v-icon>
+                      </div>
+      </template>
+      
+        
+      
+      
+    </v-data-table>
+    <!-- Dialog para updatear y dar de alta -->
+    <v-dialog v-model="dialog">
+                  <template v-slot:activator="{ on }">
+                    <div class="d-flex">
+                        <v-btn color="primary" dark v-on="on">
+                            New 
+                        </v-btn>
+                    </div>
+                  </template>
+                  <v-card>
+                    <v-card-title>
+                        <span v-if="usuarioAEditar.usuario">Edit {{usuarioAEditar.usuario}}</span>
+                        <span v-else>Create</span>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                          <v-col cols="12" sm="4">
+                            <v-text-field v-model="usuarioAEditar.nombre" label="Nombre"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="8">
+                            <v-text-field v-model="usuarioAEditar.apellido" label="Apellido"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="12">
+                            <v-text-field v-model="usuarioAEditar.Dni" label="Dni"></v-text-field>
+                          </v-col>
+                        </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blue" text @click="showEditDialog()">Cancel</v-btn>
+                      <v-btn color="blue" text @click="guardarUsuario(usua)">Save</v-btn>
+                    </v-card-actions>
+                  </v-card>
+    </v-dialog>
+  </v-card>
+  
     
-  >
-    <template v-slot:top>
-      <v-toolbar
-        flat
-      >
-        <v-toolbar-title>ABM de usuarios</v-toolbar-title>
-        <v-divider
-          class="mx-4"
-          inset
-          vertical
-        ></v-divider>
-        <v-spacer></v-spacer>
-        <v-dialog
-          v-model="dialog"
-          max-width="500px"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              color="primary"
-              dark
-              class="mb-2"
-              v-bind="attrs"
-              v-on="on"
-            >
-              New Item
-            </v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
-
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Carbs (g)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      v-model="editedItem.protein"
-                      label="Protein (g)"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="close"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="save"
-              >
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="headline">Are you sure you want to delete this item?</v-card-title>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-toolbar>
-    </template>
-    <template >/*v-slot:item.actions="{ item }"*/
-      <v-icon
-        small
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon>
-    </template>
-    <template v-slot:no-data>
-      <v-btn
-        color="primary"
-        @click="initialize"
-      >
-        Reset
-      </v-btn>
-    </template>
-  </v-data-table>
+  
 </template>
 <script>
 
 import service from "../service/ApiService"
 export default{
+
+  
    
    name:"lista-usuarios",
    
-   data: () => ({
+   data: () => ({ 
+        dialogDelete: false,
         usuarios:[],
-        titulo:"Usuarios",
+      
         headers: [
-                    {
-                        text:"Titulo",
-                        align: "center",
-                        sortable:false,
-                        value:"titulo"
-                    },
+                   
                     {
                         text:"Usuario",
                         value:"usuario",
@@ -185,16 +101,59 @@ export default{
                         text:"Dni",
                         value:"dni",
                         sortable:false
+                    },
+                    {
+                        text:"Accion",
+                        value:"acciones",
+                        sortable:false
                     }
                 ],
+        
+        dialog: false, 
+        usuarioAEditar:{}
+
 
    }),
-
+    mounted() {
+    this.obtenerUsuarios()
+  },
     methods:{
+      showEditDialog(usuario) {
+        this.usuarioAEditar = usuario||{}
+        this.dialog = !this.dialog
+    },
+       closeDelete () {
+        this.dialogDelete = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
+      guardarUsuario(usuario) {
+        /* this is used for both creating and updating API records
+         the default method is POST for creating a new item */
+        
+          service.altaUsuario(usuario);
+        
+        
+      },
+      deleteItemConfirm () {
+        this.desserts.splice(this.editedIndex, 1)
+        this.closeDelete()
+      },
+
+      close () {
+        this.dialog = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
         obtenerUsuarios(){
             service.getListaUsuarios().then((response)=>{
-                this.usuarios = response.data;
-                console.log(response.data)
+              
+                this.usuarios = response;
+                console.log(response)
             }).catch((e)=>{
                 console.log(e);
             });

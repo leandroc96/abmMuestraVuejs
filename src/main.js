@@ -12,7 +12,8 @@ Vue.config.productionTip = false
 
 //axios
 Vue.use(VueAxios, axios)
-axios.defaults.baseURL = "http://localhost:8083/api/library"
+axios.defaults.baseURL = "http://localhost:8083/"
+axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 new Vue({
   router,

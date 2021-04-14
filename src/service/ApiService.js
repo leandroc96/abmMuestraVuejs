@@ -3,7 +3,9 @@ import axios from "axios"
 const apiClient = {
     
     async getListaUsuarios(){
+       
         const response = await axios.get("/Usuario/ListaUsuario")
+        
         return response.data;
     },
     
